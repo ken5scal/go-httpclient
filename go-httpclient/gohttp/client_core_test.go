@@ -78,7 +78,7 @@ func TestGetRequestBody(t *testing.T) {
 				body:        nil,
 			},
 			want:    nil,
-			wantErr: true,
+			wantErr: false,
 		},
 		{
 			name: "JSON",

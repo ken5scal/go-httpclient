@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/ken5scal/go-httpclient/gohttp"
 )
@@ -15,6 +16,11 @@ var (
 
 func getGithubClient() gohttp.HttpClient {
 	client := gohttp.New()
+
+	client.SetConnectionTimeout(2 * time.Second)
+	client.SetResponseTimeout(1000 * time.Millisecond)
+	client.DisableTimeout(true)
+
 	commonHeaders := make(http.Header)
 	commonHeaders.Set("Authorization", "Bearer ABC-123")
 	client.SetHeaders(commonHeaders)
