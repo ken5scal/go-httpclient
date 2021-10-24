@@ -50,7 +50,7 @@ func (c *httpClient) getRequestHeders(requestHeaders http.Header) http.Header {
 
 func (c *httpClient) getRequestBody(contentType string, body interface{}) ([]byte, error) {
 	if body == nil {
-		return nil, nil
+		return nil, errors.New("body is nil")
 	}
 
 	switch strings.ToLower(contentType) {
