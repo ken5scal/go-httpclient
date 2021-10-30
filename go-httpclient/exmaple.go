@@ -4,26 +4,23 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"time"
 
 	"github.com/ken5scal/go-httpclient/gohttp"
 )
 
 var (
-	httpClient       = gohttp.New()
 	githubHttpClient = getGithubClient()
 )
 
-func getGithubClient() gohttp.HttpClient {
-	client := gohttp.New()
-
-	client.SetConnectionTimeout(2 * time.Second)
-	client.SetResponseTimeout(1000 * time.Millisecond)
-	client.DisableTimeout(true)
-
+func getGithubClient() gohttp.Client {
 	commonHeaders := make(http.Header)
 	commonHeaders.Set("Authorization", "Bearer ABC-123")
-	client.SetHeaders(commonHeaders)
+
+	client := gohttp.NewBuilder().
+		DisableTimeout(true).
+		SetMaxIdleConnections(5).
+		SetHeaders(commonHeaders).
+		Build()
 
 	return client
 }
