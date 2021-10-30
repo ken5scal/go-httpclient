@@ -32,7 +32,7 @@ func main() {
 		}()
 		time.Sleep(100 * time.Microsecond)
 	}
-	time.Sleep(20 * time.Second)
+	time.Sleep(5 * time.Second)
 }
 
 func getUrls() {

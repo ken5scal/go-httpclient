@@ -42,10 +42,10 @@ func TestGetRequestHeders(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &httpClient{
-				Headers: tt.fields.Headers,
-			}
-			if got := c.getRequestHeders(tt.args.requestHeaders); !reflect.DeepEqual(got, tt.want) {
+			c := NewBuilder().SetHeaders(tt.fields.Headers).Build()
+			got := c.(*httpClient).getRequestHeders(tt.args.requestHeaders)
+
+			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("httpClient.getRequestHeders() = %v, want %v", got, tt.want)
 			}
 		})
