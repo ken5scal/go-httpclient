@@ -30,7 +30,7 @@ func main() {
 		go func() {
 			getUrls()
 		}()
-		time.Sleep(1 * time.Second)
+		time.Sleep(100 * time.Microsecond)
 	}
 	time.Sleep(20 * time.Second)
 }
