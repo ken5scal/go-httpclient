@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"strings"
@@ -17,7 +19,7 @@ const (
 	defaultConnectionTimeout  = 1 * time.Second
 )
 
-func (c *httpClient) do(method, url string, headers http.Header, body interface{}) (*http.Response, error) {
+func (c *httpClient) do(method, url string, headers http.Header, body interface{}) (*Response, error) {
 	fullHeaders := c.getRequestHeders(headers)
 
 	requestBody, err := c.getRequestBody(fullHeaders.Get("Content-Type"), body)
@@ -31,26 +33,45 @@ func (c *httpClient) do(method, url string, headers http.Header, body interface{
 	}
 
 	request.Header = fullHeaders
-	// return c.client.Do(request)
 
 	client := c.getHttpClient()
-	return client.Do(request)
+	response, err := client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+
+	defer response.Body.Close()
+	resBody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	finalResponse := Response{
+		status:    response.Status,
+		statusCode: response.StatusCode,
+		headers:    response.Header,
+		body:       resBody,
+	}
+	return &finalResponse, nil
 }
 
+// needs to be run only once under the concurrent situation
 func (c *httpClient) getHttpClient() *http.Client {
-	if c.client != nil {
-		return c.client
-	}
+	c.clientOnce.Do(func() {
+		fmt.Println(" ----------------------------------------- ")
+		fmt.Println(" -------- Create Client------------------- ")
+		fmt.Println(" ----------------------------------------- ")
 
-	dialer := net.Dialer{Timeout: c.getConnectionTimeout()}
-	c.client = &http.Client{
-		Timeout: c.getResponseTimeout() + c.getConnectionTimeout(),
-		Transport: &http.Transport{
-			MaxIdleConnsPerHost:   c.getMaXIdleCOnnections(),
-			DialContext:           dialer.DialContext,
-			ResponseHeaderTimeout: c.getResponseTimeout(),
-		},
-	}
+		dialer := net.Dialer{Timeout: c.getConnectionTimeout()}
+		c.client = &http.Client{
+			Timeout: c.getResponseTimeout() + c.getConnectionTimeout(),
+			Transport: &http.Transport{
+				MaxIdleConnsPerHost:   c.getMaXIdleCOnnections(),
+				DialContext:           dialer.DialContext,
+				ResponseHeaderTimeout: c.getResponseTimeout(),
+			},
+		}
+	})
 
 	return c.client
 }

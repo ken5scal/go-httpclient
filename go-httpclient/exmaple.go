@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/ken5scal/go-httpclient/gohttp"
 )
@@ -26,7 +26,13 @@ func getGithubClient() gohttp.Client {
 }
 
 func main() {
-	getUrls()
+	for i := 0; i < 10; i++ {
+		go func() {
+			getUrls()
+		}()
+		time.Sleep(1 * time.Second)
+	}
+	time.Sleep(20 * time.Second)
 }
 
 func getUrls() {
@@ -35,9 +41,15 @@ func getUrls() {
 		panic(err)
 	}
 
-	fmt.Println(resp.StatusCode)
-	bytes, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(bytes))
+	fmt.Println(resp.Status())
+	fmt.Println(resp.StatusCode())
+	fmt.Println(resp.String())
+
+	var user User
+	if err := resp.UnmarshalJson(&user); err != nil {
+		panic(err)
+	}
+	fmt.Println(user.FirstName)
 }
 
 type User struct {
@@ -45,13 +57,13 @@ type User struct {
 	LastName  string `json:"last_name"`
 }
 
-func createUser(user User) {
-	resp, err := githubHttpClient.Post("http://api.github.com", nil, user)
-	if err != nil {
-		panic(err)
-	}
+// func createUser(user User) {
+// 	resp, err := githubHttpClient.Post("http://api.github.com", nil, user)
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	fmt.Println(resp.StatusCode)
-	bytes, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(bytes))
-}
+// 	fmt.Println(resp.StatusCode)
+// 	bytes, _ := ioutil.ReadAll(resp.Body)
+// 	fmt.Println(string(bytes))
+// }
