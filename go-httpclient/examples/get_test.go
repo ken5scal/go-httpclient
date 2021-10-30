@@ -3,12 +3,20 @@ package examples
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"os"
 	"reflect"
 	"testing"
 
 	"github.com/ken5scal/go-httpclient/gohttp"
 )
+
+func TestMain(m *testing.M) {
+	fmt.Println("About to start test cases for packages")
+	gohttp.StartMockServer()
+	os.Exit(m.Run())
+}
 
 func TestGetEndpoints(t *testing.T) {
 	mock1 := gohttp.Mock{
@@ -37,30 +45,29 @@ func TestGetEndpoints(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		mock    gohttp.Mock
-		want    *Endpoints
+		name string
+		mock gohttp.Mock
+		want *Endpoints
 	}{
 		{
-			name:    "TestErrorFetchingFromGithub",
-			mock:    mock1,
-			want:    nil,
+			name: "TestErrorFetchingFromGithub",
+			mock: mock1,
+			want: nil,
 		},
 		{
-			name:    "TestErrorUnmarshalResponseBody",
-			mock:    mock2,
-			want:    nil,
+			name: "TestErrorUnmarshalResponseBody",
+			mock: mock2,
+			want: nil,
 		},
 		{
-			name:    "TestNoError",
-			mock:    mock3,
-			want:    &mock3want,
+			name: "TestNoError",
+			mock: mock3,
+			want: &mock3want,
 		},
 	}
 
-	gohttp.StartMockServer()
-
 	for _, tt := range tests {
+		gohttp.FlushMocks()
 		gohttp.AddMock(tt.mock)
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := GetEndpoints()
