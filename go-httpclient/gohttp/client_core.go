@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ken5scal/go-httpclient/core"
+	"github.com/ken5scal/go-httpclient/gohttp_mock"
 	"github.com/ken5scal/go-httpclient/gomime"
 )
 
@@ -21,7 +23,7 @@ const (
 	defaultConnectionTimeout  = 1 * time.Second
 )
 
-func (c *httpClient) do(method, url string, headers http.Header, body interface{}) (*Response, error) {
+func (c *httpClient) do(method, url string, headers http.Header, body interface{}) (*core.Response, error) {
 	fullHeaders := c.getRequestHeders(headers)
 
 	requestBody, err := c.getRequestBody(fullHeaders.Get("Content-Type"), body)
@@ -29,7 +31,7 @@ func (c *httpClient) do(method, url string, headers http.Header, body interface{
 		return nil, errors.New("Error creating requestBody: " + err.Error())
 	}
 
-	if mock := mockupServer.getMock(method, url, string(requestBody)); mock != nil {
+	if mock := gohttp_mock.GetMock(method, url, string(requestBody)); mock != nil {
 		return mock.GetResponse()
 	}
 
@@ -52,11 +54,11 @@ func (c *httpClient) do(method, url string, headers http.Header, body interface{
 		return nil, err
 	}
 
-	finalResponse := Response{
-		status:     response.Status,
-		statusCode: response.StatusCode,
-		headers:    response.Header,
-		body:       resBody,
+	finalResponse := core.Response{
+		Status:     response.Status,
+		StatusCode: response.StatusCode,
+		Headers:    response.Header,
+		Body:       resBody,
 	}
 	return &finalResponse, nil
 }

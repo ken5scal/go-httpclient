@@ -9,29 +9,29 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ken5scal/go-httpclient/gohttp"
+	"github.com/ken5scal/go-httpclient/gohttp_mock"
 )
 
 func TestMain(m *testing.M) {
 	fmt.Println("About to start test cases for packages")
-	gohttp.StartMockServer()
+	gohttp_mock.StartMockServer()
 	os.Exit(m.Run())
 }
 
 func TestGetEndpoints(t *testing.T) {
-	mock1 := gohttp.Mock{
+	mock1 := gohttp_mock.Mock{
 		Method: http.MethodGet,
 		Url:    "https://api.github.com",
 		Error:  errors.New("timeout getting github endpoints"),
 	}
-	mock2 := gohttp.Mock{
+	mock2 := gohttp_mock.Mock{
 		Method:             http.MethodGet,
 		Url:                "https://api.github.com",
 		ResponseStatusCode: http.StatusOK,
 		ResponseBody:       `{"current_user_url": 123}`,
 		Error:              errors.New("timeout getting github endpoints"),
 	}
-	mock3 := gohttp.Mock{
+	mock3 := gohttp_mock.Mock{
 		Method:             http.MethodGet,
 		Url:                "https://api.github.com",
 		ResponseStatusCode: http.StatusOK,
@@ -46,7 +46,7 @@ func TestGetEndpoints(t *testing.T) {
 
 	tests := []struct {
 		name string
-		mock gohttp.Mock
+		mock gohttp_mock.Mock
 		want *Endpoints
 	}{
 		{
@@ -67,8 +67,8 @@ func TestGetEndpoints(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		gohttp.FlushMocks()
-		gohttp.AddMock(tt.mock)
+		gohttp_mock.DeleteMocks()
+		gohttp_mock.AddMock(tt.mock)
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := GetEndpoints()
 			if err != nil && tt.mock.Error != nil {

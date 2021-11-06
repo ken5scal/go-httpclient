@@ -1,85 +1,85 @@
 package gohttp
 
-import (
-	"crypto/md5"
-	"encoding/hex"
-	"fmt"
-	"strings"
-	"sync"
-)
+// import (
+// 	"crypto/md5"
+// 	"encoding/hex"
+// 	"fmt"
+// 	"strings"
+// 	"sync"
+// )
 
-var mockupServer = mockServer{
-	mocks: make(map[string]*Mock),
-}
+// var mockupServer = mockServer{
+// 	mocks: make(map[string]*Mock),
+// }
 
-type mockServer struct {
-	enabled     bool
-	serverMutex sync.Mutex
+// type mockServer struct {
+// 	enabled     bool
+// 	serverMutex sync.Mutex
 
-	mocks map[string]*Mock
-}
+// 	mocks map[string]*Mock
+// }
 
-func StartMockServer() {
-	mockupServer.serverMutex.Lock()
-	defer mockupServer.serverMutex.Unlock()
+// func StartMockServer() {
+// 	mockupServer.serverMutex.Lock()
+// 	defer mockupServer.serverMutex.Unlock()
 
-	mockupServer.enabled = true
-}
+// 	mockupServer.enabled = true
+// }
 
-func StopMockServer() {
-	mockupServer.serverMutex.Lock()
-	defer mockupServer.serverMutex.Unlock()
+// func StopMockServer() {
+// 	mockupServer.serverMutex.Lock()
+// 	defer mockupServer.serverMutex.Unlock()
 
-	mockupServer.enabled = false
-}
+// 	mockupServer.enabled = false
+// }
 
-func FlushMocks() {
-	mockupServer.serverMutex.Lock()
-	defer mockupServer.serverMutex.Unlock()
+// func FlushMocks() {
+// 	mockupServer.serverMutex.Lock()
+// 	defer mockupServer.serverMutex.Unlock()
 
-	mockupServer.mocks = make(map[string]*Mock)
-}
+// 	mockupServer.mocks = make(map[string]*Mock)
+// }
 
-func AddMock(mock Mock) {
-	mockupServer.serverMutex.Lock()
-	defer mockupServer.serverMutex.Unlock()
+// func AddMock(mock Mock) {
+// 	mockupServer.serverMutex.Lock()
+// 	defer mockupServer.serverMutex.Unlock()
 
-	key := mockupServer.getMockKey(mock.Method, mock.Url, mock.RequestBody)
-	mockupServer.mocks[key] = &mock
-}
+// 	key := mockupServer.getMockKey(mock.Method, mock.Url, mock.RequestBody)
+// 	mockupServer.mocks[key] = &mock
+// }
 
-func (m *mockServer) getMockKey(method, url, body string) string {
-	hasher := md5.New()
-	hasher.Write([]byte(method + url + m.cleanBody(body)))
-	key := hex.EncodeToString(hasher.Sum(nil))
+// func (m *mockServer) getMockKey(method, url, body string) string {
+// 	hasher := md5.New()
+// 	hasher.Write([]byte(method + url + m.cleanBody(body)))
+// 	key := hex.EncodeToString(hasher.Sum(nil))
 
-	return key
-}
+// 	return key
+// }
 
-func (m *mockServer) cleanBody(body string) string {
-	body = strings.TrimSpace(body)
-	if body == "" {
-		return ""
-	}
+// func (m *mockServer) cleanBody(body string) string {
+// 	body = strings.TrimSpace(body)
+// 	if body == "" {
+// 		return ""
+// 	}
 
-	body = strings.ReplaceAll(body, "\t", "")
-	body = strings.ReplaceAll(body, "\n", "")
-	return body
-}
+// 	body = strings.ReplaceAll(body, "\t", "")
+// 	body = strings.ReplaceAll(body, "\n", "")
+// 	return body
+// }
 
-func (m *mockServer) getMock(method, url, body string) *Mock {
-	if !m.enabled {
-		return nil
-	}
+// func (m *mockServer) getMock(method, url, body string) *Mock {
+// 	if !m.enabled {
+// 		return nil
+// 	}
 
-	key := m.getMockKey(method, url, body)
-	mock := m.mocks[key]
+// 	key := m.getMockKey(method, url, body)
+// 	mock := m.mocks[key]
 
-	if mock != nil {
-		return mock
-	}
+// 	if mock != nil {
+// 		return mock
+// 	}
 
-	return &Mock{
-		Error: fmt.Errorf("no mock matching %s from %s with given body", method, url),
-	}
-}
+// 	return &Mock{
+// 		Error: fmt.Errorf("no mock matching %s from %s with given body", method, url),
+// 	}
+// }
