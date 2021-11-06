@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+// The Mock structure provides a xlean way to configure HTTP mocks based on
+// the combination between request method, URL and request body.
 type Mock struct {
 	Method      string
 	Url         string
@@ -15,6 +17,7 @@ type Mock struct {
 	ResponseStatusCode int
 }
 
+// GetResponse returns a response object based on the mock configuration.
 func (m *Mock) GetResponse() (*Response, error) {
 	if m.Error != nil {
 		return nil, m.Error
