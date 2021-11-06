@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/ken5scal/go-httpclient/gomime"
 )
 
 const (
@@ -51,7 +53,7 @@ func (c *httpClient) do(method, url string, headers http.Header, body interface{
 	}
 
 	finalResponse := Response{
-		status:    response.Status,
+		status:     response.Status,
 		statusCode: response.StatusCode,
 		headers:    response.Header,
 		body:       resBody,
@@ -65,6 +67,11 @@ func (c *httpClient) getHttpClient() *http.Client {
 		fmt.Println(" ----------------------------------------- ")
 		fmt.Println(" -------- Create Client------------------- ")
 		fmt.Println(" ----------------------------------------- ")
+
+		if c.builder.client != nil {
+			c.client = c.builder.client
+			return
+		}
 
 		dialer := net.Dialer{Timeout: c.getConnectionTimeout()}
 		c.client = &http.Client{
@@ -110,34 +117,15 @@ func (c *httpClient) getConnectionTimeout() time.Duration {
 	return defaultConnectionTimeout
 }
 
-func (c *httpClient) getRequestHeders(requestHeaders http.Header) http.Header {
-	result := make(http.Header)
-
-	// add common headers to the request
-	for header, value := range c.builder.headers {
-		if len(value) > 0 {
-			result.Set(header, value[0])
-		}
-	}
-
-	// add custom headers to the requests:
-	for header, value := range requestHeaders {
-		if len(value) > 0 {
-			result.Set(header, value[0])
-		}
-	}
-	return result
-}
-
 func (c *httpClient) getRequestBody(contentType string, body interface{}) ([]byte, error) {
 	if body == nil {
 		return nil, nil
 	}
 
 	switch strings.ToLower(contentType) {
-	case "application/json":
+	case gomime.ContentTypeJson:
 		return json.Marshal(body)
-	case "application/xml":
+	case gomime.ContentTypeXml:
 		return xml.Marshal(body)
 	default:
 		return json.Marshal(body)
