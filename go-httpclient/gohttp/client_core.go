@@ -31,10 +31,6 @@ func (c *httpClient) do(method, url string, headers http.Header, body interface{
 		return nil, errors.New("Error creating requestBody: " + err.Error())
 	}
 
-	if mock := gohttp_mock.GetMock(method, url, string(requestBody)); mock != nil {
-		return mock.GetResponse()
-	}
-
 	request, err := http.NewRequest(method, url, bytes.NewBuffer(requestBody))
 	if err != nil {
 		return nil, errors.New("Error creating request: " + err.Error())
@@ -43,6 +39,7 @@ func (c *httpClient) do(method, url string, headers http.Header, body interface{
 	request.Header = fullHeaders
 
 	client := c.getHttpClient()
+
 	response, err := client.Do(request)
 	if err != nil {
 		return nil, err
@@ -64,7 +61,11 @@ func (c *httpClient) do(method, url string, headers http.Header, body interface{
 }
 
 // needs to be run only once under the concurrent situation
-func (c *httpClient) getHttpClient() *http.Client {
+func (c *httpClient) getHttpClient() core.HttpClient {
+	if gohttp_mock.MockupServer.IsMockServerEnabled() {
+		return gohttp_mock.MockupServer.GetMockedClient()
+	}
+
 	c.clientOnce.Do(func() {
 		fmt.Println(" ----------------------------------------- ")
 		fmt.Println(" -------- Create Client------------------- ")

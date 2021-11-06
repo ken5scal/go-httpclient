@@ -14,7 +14,7 @@ import (
 
 func TestMain(m *testing.M) {
 	fmt.Println("About to start test cases for packages")
-	gohttp_mock.StartMockServer()
+	gohttp_mock.MockupServer.Start()
 	os.Exit(m.Run())
 }
 
@@ -67,8 +67,8 @@ func TestGetEndpoints(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		gohttp_mock.DeleteMocks()
-		gohttp_mock.AddMock(tt.mock)
+		gohttp_mock.MockupServer.DeleteMocks()
+		gohttp_mock.MockupServer.AddMock(tt.mock)
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := GetEndpoints()
 			if err != nil && tt.mock.Error != nil {
